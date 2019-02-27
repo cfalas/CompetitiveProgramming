@@ -11,18 +11,27 @@ Status  70%
         TLE in 4/20 testcases
         WA in 2/20 testcases
 
-  ______      _                _____ 
+UPDATE: 85%
+        Solved WAs by completely removing the MOD in order to avoid collisions
+
+UPDATE2:    80%
+            Replaced map with policy based data structures to decrease constant times, but this increased memory usage, so I lose the testcases for RTE
+UPDATE3:    100%
+            Replaced policy based hash table with unordered_map, AC
+            
+  ______      _                _____
   |  ____/\   | |        /\    / ____|
-  | |__ /  \  | |       /  \  | (___  
+  | |__ /  \  | |       /  \  | (___
   |  __/ /\ \ | |      / /\ \  \___ \
   | | / ____ \| |____ / ____ \ ____) |
-  |_|/_/    \_\______/_/    \_\_____/ 
-                                            
-                                            
+  |_|/_/    \_\______/_/    \_\_____/
+
+
 
 */
 #include<bits/stdc++.h>
 using namespace std;
+#include <ext/pb_ds/assoc_container.hpp>
 
 #define ll long long
 #define INF 1000000
@@ -44,14 +53,14 @@ ll modpow(ll x, ll y){
     if(y==0)
         return 1;
     if(y==1)
-        return x%MOD;
+        return x;
 
     ll z = modpow(x, y/2);
-    z = (z*z)%MOD;
+    z = (z*z);
 
     if(y%2==1)
         z = z*x;
-    return z%MOD;
+    return z;
 }
 
 int main(){
@@ -65,41 +74,38 @@ int main(){
         b+=a[i];
         b+="{";
     }
-    map<ll, ll> hashes;
+    unordered_map<ll, int> hashes;
     vector<set<ll> > ans;
     ans.assign(n+1, set<ll>());
 
+    ll hash = 0;
     for(ll i=0;i<n;i++){
-        ll hash = 0;
+        hash = 0;
         for(ll j=0;j<a[i].size();j++)
-            hash = (hash*29) % MOD + (a[i][j] - 'a'+1);
+            hash = (hash*29) + (a[i][j] - 'a'+1);
         //cout<<hash<<endl;
-        hashes[hash] ++;
+        hashes[hash]++;
     }
-    for(ll siz=1;siz<=10;siz++){
+    for(int siz=1;siz<=10;siz++){
         //cout<<siz<<": -------------\n";
-        ll strcnt = 0;
-        ll cnt=0;
+        int strcnt = 0;
+        int cnt=0;
         ll currhash = 0;
         while(cnt<siz){
+            currhash = currhash * 29 + (b[cnt] - 'a' + 1);
+            currhash = currhash;
             if(b[cnt]=='{')
                 strcnt++;
-            currhash = currhash * 29 + (b[cnt] - 'a' + 1);
-            currhash = currhash%MOD;
             cnt++;
         }
-        for(ll i=cnt;i<b.size();i++){
+        for(int i=cnt;i<b.size();i++){
             //cout<<strcnt<<" "<<currhash<<endl;
             if(hashes[currhash]){
-                
+
                 ans[strcnt].insert(currhash);
             }
             currhash -= modpow(29, siz - 1)*(b[i-siz] - 'a' + 1);
-            if(currhash<0){
-                currhash += ((-currhash) / MOD + 1)*MOD;
-            }
             currhash*=29;
-            currhash%=MOD;
             currhash += (b[i] - 'a' + 1);
             if(b[i]=='{')
                 strcnt++;
@@ -116,7 +122,7 @@ int main(){
         }
     }
     cout<<anss-n<<endl;
-    
+
 
 }
 
